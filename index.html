@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>季初言的私藏电台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    
+    <style>
+        :root {
+            --color-01: #142844; /* 深蓝 */
+            --color-02: #3966A2; /* 中蓝 */
+            --color-03: #6192D3; /* 浅蓝 */
+            --color-04: #D5DFEB; /* 灰蓝 */
+            --color-05: #F8F6F7; /* 极浅灰/白 */
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--color-01) 0%, var(--color-02) 100%);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 玻璃拟态容器 */
+        .container {
+            width: 90%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(213, 223, 235, 0.2);
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        /* 季初言状态区 */
+        .ji-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(213, 223, 235, 0.1);
+            border-radius: 15px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--color-03);
+            background: var(--color-02); /* 这里你可以替换成季初言的头像地址 */
+            flex-shrink: 0;
+        }
+
+        .ji-speech {
+            margin-left: 12px;
+            text-align: left;
+        }
+
+        .ji-speech .name {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--color-04);
+            display: block;
+        }
+
+        .ji-speech .bubble {
+            font-size: 13px;
+            color: var(--color-05);
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        /* APlayer 样式覆盖 */
+        .aplayer {
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 15px !important;
+            color: var(--color-05) !important;
+        }
+
+        .aplayer .aplayer-info {
+            padding: 10px 0 0 0 !important;
+        }
+
+        .aplayer .aplayer-lrc {
+            height: 80px !important; /* 增加歌词高度，更有代入感 */
+            mask-image: linear-gradient(to bottom, transparent, #000, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, #000, transparent);
+        }
+
+        .aplayer .aplayer-lrc p {
+            color: var(--color-04) !important;
+            font-size: 15px !important;
+            opacity: 0.5;
+        }
+
+        .aplayer .aplayer-lrc p.aplayer-lrc-current {
+            color: var(--color-05) !important;
+            font-weight: bold !important;
+            text-shadow: 0 0 10px var(--color-03);
+            opacity: 1;
+        }
+
+        .aplayer .aplayer-pic {
+            border-radius: 12px !important;
+        }
+
+        /* 底部版权信息 */
+        .footer {
+            margin-top: 15px;
+            font-size: 10px;
+            color: var(--color-04);
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="ji-status">
+        <div class="avatar"></div> <div class="ji-speech">
+            <span class="name">季初言</span>
+            <div class="bubble" id="ji-comment">耳机分你一半，别乱切歌。</div>
+        </div>
+    </div>
+
+    <meting-js
+        server="netease"
+        type="playlist"
+        id="2083960301" 
+        theme="#6192D3"
+        autoplay="false"
+        order="random"
+        list-folded="true"
+        lrc-type="0">
+    </meting-js>
+
+    <div class="footer">Ji Chuyan Cyber Radio v1.0 | 033 Special</div>
+</div>
+
+<script>
+    // --- [位置：index.html 最后的 <script> 标签内] ---
+
+// 1. 初始化 Telegram WebApp 接口
+const tg = window.Telegram.WebApp;
+tg.expand(); // 让网页全屏打开
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 获取播放器实例（前提是你的网页里有 meting-js）
+    const ap = document.querySelector('meting-js').aplayer;
+
+    // 2. 核心：监听歌词显示事件
+    ap.on('lrcshow', (lrc) => {
+        const currentLrc = lrc.text;
+        
+        // 将当前歌词传回给 Termux 的 Python 后台
+        tg.sendData(JSON.stringify({
+            type: "lyric_sync",
+            content: currentLrc
+        }));
+    });
+
+    // 3. 监听切歌事件
+    ap.on('listswitch', () => {
+        const songName = ap.list.audios[ap.list.index].title;
+        tg.sendData(JSON.stringify({
+            type: "song_change",
+            content: songName
+        }));
+    });
+});
+
+</script>
+
+</body>
+</html>
