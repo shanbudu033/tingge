@@ -67,22 +67,29 @@ body {
 </meting-js>
 
 </div>
-
 <script>
 const tg = window.Telegram?.WebApp;
 if (tg) tg.expand();
 
 let ap = null;
+let ready = false;
 
-// ✅ 等 Meting 初始化
-const meting = document.getElementById('player');
+// 🔥 强制轮询拿播放器（比 aplayer-ready 更稳）
+const timer = setInterval(() => {
+    const meting = document.querySelector('#player');
+    if (meting && meting.aplayer) {
+        ap = meting.aplayer;
+        ready = true;
+        clearInterval(timer);
+        console.log("播放器已捕获", ap);
 
-meting.addEventListener('aplayer-ready', () => {
-    ap = meting.aplayer;
+        bindEvents();
+    }
+}, 300);
 
-    console.log("播放器已就绪");
 
-    // ✅ 歌词同步
+// ✅ 绑定事件
+function bindEvents() {
     ap.on('lrcshow', (lrc) => {
         tg?.sendData(JSON.stringify({
             type: "lyric_sync",
@@ -90,7 +97,6 @@ meting.addEventListener('aplayer-ready', () => {
         }));
     });
 
-    // ✅ 切歌同步
     ap.on('listswitch', () => {
         const song = ap.list.audios[ap.list.index];
         tg?.sendData(JSON.stringify({
@@ -99,40 +105,53 @@ meting.addEventListener('aplayer-ready', () => {
         }));
     });
 
-    // ❗ 音源兜底（网易云挂了自动换）
     ap.on('error', () => {
-        console.log("网易云失败，尝试切换音源");
-        switchSource();
+        console.log("网易云挂了，切备用音源");
+        forcePlayTestAudio();
     });
-});
-
-
-// ✅ 用户点击解锁音频（核心！！）
-document.getElementById('unlockBtn').addEventListener('click', () => {
-    if (!ap) return;
-
-    ap.play();
-
-    // 尝试取消静音（兼容某些 WebView）
-    ap.audio.muted = false;
-
-    document.getElementById('unlockBtn').innerText = "🎵 播放中...";
-});
-
-
-// ✅ 音源 fallback（简单版）
-function switchSource() {
-    if (!ap) return;
-
-    const current = ap.list.audios[ap.list.index];
-
-    // 用一个公开音频兜底（测试用）
-    current.url = "https://music.163.com/song/media/outer/url?id=1330348068.mp3";
-
-    ap.switch(ap.list.index);
-    ap.play();
 }
 
+
+// ✅ 点击按钮（重点修复）
+document.getElementById('unlockBtn').addEventListener('click', async () => {
+    if (!ready) {
+        alert("播放器还没加载好");
+        return;
+    }
+
+    try {
+        // 🔥 关键：先静音播放再解锁
+        ap.audio.muted = true;
+
+        await ap.play();
+
+        ap.audio.muted = false;
+
+        console.log("播放成功");
+        document.getElementById('unlockBtn').innerText = "🎵 正在播放";
+
+    } catch (e) {
+        console.log("播放失败，尝试强制音频", e);
+        forcePlayTestAudio();
+    }
+});
+
+
+// ✅ 强制播放一个绝对能播的音频（排除环境问题）
+function forcePlayTestAudio() {
+    if (!ap) return;
+
+    ap.list.clear();
+
+    ap.list.add([{
+        name: "测试音频",
+        artist: "debug",
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+        cover: ""
+    }]);
+
+    ap.play();
+}
 </script>
 
 </body>
