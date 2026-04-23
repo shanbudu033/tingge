@@ -1,107 +1,142 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>季初言的私藏电台</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-    
-    <style>
-        :root {
-            --color-01: #142844; /* 深蓝 */
-            --color-02: #3966A2; /* 中蓝 */
-            --color-03: #6192D3; /* 浅蓝 */
-            --color-04: #D5DFEB; /* 灰蓝 */
-            --color-05: #F8F6F7; /* 极浅灰/白 */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>季初言的私藏电台</title>
 
-        body {
-            background: linear-gradient(135deg, var(--color-01) 0%, var(--color-02) 100%);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            overflow: hidden;
-        }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
 
-        /* 玻璃拟态容器 */
-        .container {
-            width: 90%;
-            max-width: 450px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(213, 223, 235, 0.2);
-            padding: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
+<style>
+:root {
+    --color-01: #142844;
+    --color-02: #3966A2;
+    --color-03: #6192D3;
+    --color-04: #D5DFEB;
+    --color-05: #F8F6F7;
+}
 
-        /* 季初言状态区 */
-        .ji-status {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(213, 223, 235, 0.1);
-            border-radius: 15px;
-        }
+body {
+    background: linear-gradient(135deg, var(--color-01), var(--color-02));
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+}
 
-        .avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: 2px solid var(--color-03);
-            background: var(--color-02); /* 这里你可以替换成季初言的头像地址 */
-            flex-shrink: 0;
-        }
+.container {
+    width: 90%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+}
 
-        .ji-speech {
-            margin-left: 12px;
-            text-align: left;
-        }
+.unlock {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    cursor: pointer;
+}
+</style>
+</head>
 
-        .ji-speech .name {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--color-04);
-            display: block;
-        }
+<body>
 
-        .ji-speech .bubble {
-            font-size: 13px;
-            color: var(--color-05);
-            line-height: 1.4;
-            opacity: 0.9;
-        }
+<div class="container">
 
-        /* APlayer 样式覆盖 */
-        .aplayer {
-            background: transparent !important;
-            box-shadow: none !important;
-            border-radius: 15px !important;
-            color: var(--color-05) !important;
-        }
+<div class="unlock" id="unlockBtn">▶ 点我启动音乐</div>
 
-        .aplayer .aplayer-info {
-            padding: 10px 0 0 0 !important;
-        }
+<meting-js
+    id="player"
+    server="netease"
+    type="playlist"
+    id="17898543713"
+    order="random"
+    theme="#6192D3"
+    autoplay="false"
+    list-folded="true">
+</meting-js>
 
-        .aplayer .aplayer-lrc {
-            height: 80px !important; /* 增加歌词高度，更有代入感 */
-            mask-image: linear-gradient(to bottom, transparent, #000, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, #000, transparent);
-        }
+</div>
 
-        .aplayer .aplayer-lrc p {
-            color: var(--color-04) !important;
-            font-size: 15px !important;
-            opacity: 0.5;
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
+
+let ap = null;
+
+// ✅ 等 Meting 初始化
+const meting = document.getElementById('player');
+
+meting.addEventListener('aplayer-ready', () => {
+    ap = meting.aplayer;
+
+    console.log("播放器已就绪");
+
+    // ✅ 歌词同步
+    ap.on('lrcshow', (lrc) => {
+        tg?.sendData(JSON.stringify({
+            type: "lyric_sync",
+            content: lrc.text
+        }));
+    });
+
+    // ✅ 切歌同步
+    ap.on('listswitch', () => {
+        const song = ap.list.audios[ap.list.index];
+        tg?.sendData(JSON.stringify({
+            type: "song_change",
+            content: song.title
+        }));
+    });
+
+    // ❗ 音源兜底（网易云挂了自动换）
+    ap.on('error', () => {
+        console.log("网易云失败，尝试切换音源");
+        switchSource();
+    });
+});
+
+
+// ✅ 用户点击解锁音频（核心！！）
+document.getElementById('unlockBtn').addEventListener('click', () => {
+    if (!ap) return;
+
+    ap.play();
+
+    // 尝试取消静音（兼容某些 WebView）
+    ap.audio.muted = false;
+
+    document.getElementById('unlockBtn').innerText = "🎵 播放中...";
+});
+
+
+// ✅ 音源 fallback（简单版）
+function switchSource() {
+    if (!ap) return;
+
+    const current = ap.list.audios[ap.list.index];
+
+    // 用一个公开音频兜底（测试用）
+    current.url = "https://music.163.com/song/media/outer/url?id=1330348068.mp3";
+
+    ap.switch(ap.list.index);
+    ap.play();
+}
+
+</script>
+
+</body>
+</html>            opacity: 0.5;
         }
 
         .aplayer .aplayer-lrc p.aplayer-lrc-current {
