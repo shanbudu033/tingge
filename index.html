@@ -1,13 +1,15 @@
-<button onclick="test()">点我测试声音</button>
+<div id="aplayer"></div>
 
 <script>
-function test() {
-    const audio = new Audio("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3");
-    audio.play().then(() => {
-        alert("播放成功");
-    }).catch(e => {
-        alert("播放失败: " + e.message);
-        console.log(e);
-    });
-}
+const ap = new APlayer({
+    container: document.getElementById('aplayer'),
+    audio: [{
+        name: '测试音频',
+        artist: 'debug',
+        url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3',
+        cover: ''
+    }]
+});
+
+window.testAp = ap;
 </script>
