@@ -152,31 +152,51 @@ textarea {
             }
         }
 
-        function playTurn() {
-            const playerKey = is033Turn ? '033' : 'ji';
-            const playerName = is033Turn ? '033' : '季初言';
-            const steps = Math.floor(Math.random() * 6) + 1;
-            
-            pos[playerKey] = (pos[playerKey] + steps) % tasks.length;
-            updateMarker(playerKey, pos[playerKey]);
+function playTurn() {
+    const btn = document.getElementById('dice-btn');
 
-            const task = tasks[pos[playerKey]];
-            document.getElementById('status').innerText = `${playerName} 走了 ${steps} 步 ➔ ${task}`;
+    if (is033Turn) {
+        // --- 033 的回合：网页内直接掷骰子 ---
+        const steps = Math.floor(Math.random() * 6) + 1;
+        pos['033'] = (pos['033'] + steps) % tasks.length;
+        updateMarker('033', pos['033']);
 
-            tg.sendData(JSON.stringify({
-                type: 'chess_game',
-                player: playerName,
-                task: task
-            }));
+        const task = tasks[pos['033']];
+        document.getElementById('status').innerText = `你走了 ${steps} 步 ➔ ${task}`;
 
-            tg.HapticFeedback.impactOccurred('light');
+        // 告诉后端你落在了哪，触发季初言的吐槽
+        tg.sendData(JSON.stringify({
+            type: 'chess_game',
+            player: '033',
+            task: task
+        }));
 
-            is033Turn = !is033Turn;
-            const btn = document.getElementById('dice-btn');
-            btn.innerText = is033Turn ? "🎲 033 掷骰子" : "🎲 让季初言掷骰子";
-            btn.style.background = is033Turn ? "var(--accent-white)" : "var(--ji-red)";
-            btn.style.color = is033Turn ? "var(--bg-dark)" : "white";
-        }
+        tg.HapticFeedback.impactOccurred('light');
+
+        // 切换到季初言的回合 UI
+        is033Turn = false;
+        btn.innerText = "🎲 让季初言掷骰子";
+        btn.style.background = "var(--ji-red)"; // 季初言的代表色
+        btn.style.color = "white";
+
+    } else {
+        // --- 季初言的回合：呼叫 TG 原生骰子 ---
+        document.getElementById('status').innerText = "等待季初言掷骰子...";
+        
+        // 发送指令给后端，触发 bot.send_dice
+        tg.sendData(JSON.stringify({
+            type: 'ji_turn'
+        }));
+
+        tg.HapticFeedback.notificationOccurred('success');
+
+        // 这里建议延迟一小会儿自动关闭网页，方便你回聊天框看他投骰子
+        setTimeout(() => {
+            tg.close();
+        }, 1500); 
+    }
+}
+
 
         renderBoard();
     </script>
