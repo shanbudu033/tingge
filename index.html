@@ -2,95 +2,107 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>033 x 季初言：命运羁绊棋</title>
 
-  <style>  
-/* 033 专属：午后书房配色（Light Mode） */
-:root {
-    --bg-light: #F7F9FC;      /* 极浅的蓝灰色底 */
-    --card-bg: rgba(255, 255, 255, 0.7); /* 半透明白色（毛玻璃感） */
-    --border-soft: #D1DBE8;   /* 柔和的边框线 */
-    --main-blue: #5B8ABD;     /* 优雅的中度蓝 */
-    --text-main: #2C3E50;     /* 深石墨色文字 */
-    --ji-red: #E74C3C;        /* 季初言的红（在浅色下更有精神） */
-}
+    <style>  
+        /* 033 专属：午后书房配色 */
+        :root {
+            --bg-light: #F7F9FC;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-soft: #D1DBE8;
+            --main-blue: #5B8ABD;
+            --text-main: #2C3E50;
+            --ji-red: #E74C3C;
+        }
 
-body { 
-    background: var(--bg-light); 
-    background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); /* 增加一点光泽感 */
-    color: var(--text-main); 
-    font-family: 'PingFang SC', -apple-system, sans-serif; 
-    margin: 0; padding: 15px; 
-    display: flex; flex-direction: column; height: 100vh;
-}
+        body { 
+            background: var(--bg-light); 
+            background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            color: var(--text-main); 
+            font-family: 'PingFang SC', system-ui, sans-serif; 
+            margin: 0; padding: 15px; 
+            display: flex; flex-direction: column; height: 100vh;
+            overflow: hidden; /* 防止页面整体抖动 */
+        }
 
-h2 { color: var(--text-main); margin: 0 0 10px 0; font-weight: 600; letter-spacing: 1px; text-align: center; }
+        h2 { color: var(--text-main); margin: 0 0 10px 0; font-weight: 600; text-align: center; font-size: 1.2rem; }
 
-#config-zone { 
-    background: var(--card-bg); 
-    backdrop-filter: blur(10px);
-    padding: 12px; border-radius: 16px; 
-    margin-bottom: 15px; border: 1px solid var(--border-soft); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
+        #config-zone { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(10px);
+            padding: 12px; border-radius: 16px; 
+            margin-bottom: 15px; border: 1px solid var(--border-soft); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
 
-textarea { 
-    width: 94%; height: 50px; background: rgba(255, 255, 255, 0.5); 
-    color: var(--text-main); border: 1px solid var(--border-soft); 
-    border-radius: 10px; padding: 8px; font-size: 13px; outline: none;
-}
+        textarea { 
+            width: 100%; height: 40px; background: rgba(255, 255, 255, 0.5); 
+            color: var(--text-main); border: 1px solid var(--border-soft); 
+            border-radius: 10px; padding: 8px; font-size: 13px; outline: none;
+            box-sizing: border-box; resize: none;
+        }
 
-.import-btn { 
-    background: var(--main-blue); color: white; 
-    border: none; padding: 6px 18px; border-radius: 8px; 
-    margin-top: 8px; font-weight: bold; font-size: 12px;
-}
+        .import-btn { 
+            background: var(--main-blue); color: white; 
+            border: none; padding: 6px 18px; border-radius: 8px; 
+            margin-top: 8px; font-weight: bold; font-size: 12px; width: 100%;
+        }
 
-.cell { 
-    background: var(--card-bg); 
-    backdrop-filter: blur(5px);
-    border: 1px solid var(--border-soft); 
-    min-height: 80px; border-radius: 14px !important; 
-    display: flex; align-items: center; justify-content: center; 
-    font-size: 11px; font-weight: 500; padding: 6px; position: relative; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-    line-height: 1.3; color: var(--text-main);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-}
+        /* 棋盘布局控制 */
+        #board-container { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 每行3个格子 */
+            gap: 10px;
+        }
 
-/* 激活状态：给季初言的位置加一点“存在感” */
-.active-ji { 
-    border: 2px solid var(--ji-red) !important; 
-    background: rgba(231, 76, 60, 0.05);
-    transform: scale(1.05); /* 选中的格子稍微放大 */
-}
+        .cell { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-soft); 
+            min-height: 70px; border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 12px; padding: 10px; position: relative; 
+            transition: all 0.3s ease; text-align: center;
+        }
 
-.active-033 { 
-    border: 2px solid var(--main-blue) !important; 
-    background: rgba(91, 138, 189, 0.05);
-    transform: scale(1.05);
-}
+        /* 棋子标记样式 */
+        .p-mark {
+            position: absolute; bottom: 5px; width: 12px; height: 12px; border-radius: 50%;
+        }
+        .p-033 { left: 10px; background: var(--main-blue); border: 2px solid white; box-shadow: 0 0 5px rgba(91,138,189,0.5); }
+        .p-ji { right: 10px; background: var(--ji-red); border: 2px solid white; box-shadow: 0 0 5px rgba(231,76,60,0.5); }
 
-#dice-btn { 
-    background: var(--text-main); color: white; 
-    border: none; padding: 14px 50px; border-radius: 40px; 
-    font-weight: bold; font-size: 15px; 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-<style>
-</head>
+        .active-033 { border: 2px solid var(--main-blue) !important; background: white; transform: translateY(-2px); }
+        .active-ji { border: 2px solid var(--ji-red) !important; background: white; transform: translateY(-2px); }
+
+        #status { text-align: center; margin-top: 10px; font-size: 13px; color: var(--main-blue); font-weight: bold; }
+
+        .controls {
+            position: fixed; bottom: 20px; left: 0; right: 0;
+            display: flex; justify-content: center; padding: 0 20px;
+        }
+
+        #dice-btn { 
+            background: var(--text-main); color: white; 
+            border: none; padding: 12px 40px; border-radius: 40px; 
+            font-weight: bold; font-size: 16px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 100%;
+        }
+    </style> </head>
 <body>
 
     <h2>命运羁绊棋</h2>
     
     <div id="config-zone">
-        <textarea id="task-input" placeholder="输入任意数量指令，用空格或逗号隔开..."></textarea>
-        <button class="import-btn" onclick="importTasks()">✨ 导入指令</button>
+        <textarea id="task-input" placeholder="输入指令，空格或逗号隔开..."></textarea>
+        <button class="import-btn" onclick="importTasks()">✨ 重新部署棋盘</button>
     </div>
     
     <div id="board-container">
-        <div class="board" id="board"></div>
+        <div id="board"></div>
         <div id="status">准备就绪</div>
     </div>
 
@@ -103,8 +115,7 @@ textarea {
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 默认指令 (可以无限长)
-        let tasks = ["起点", "评价画稿", "清算TODO", "季初言心声", "讲冷笑话", "摸头杀", "喝杯水", "坦白局", "换人设", "毒舌模式", "温柔语音", "终点"];
+        let tasks = ["起点", "评价画稿", "TODO清算", "季初言心声", "讲冷笑话", "摸头杀", "喝杯水", "坦白局", "换人设", "毒舌模式", "温柔语音", "终点"];
         let pos = { '033': 0, 'ji': 0 };
         let is033Turn = true;
 
@@ -127,76 +138,47 @@ textarea {
         function importTasks() {
             const input = document.getElementById('task-input').value;
             if(!input) return;
-            // 改进分词逻辑
             const newTasks = input.split(/[，, \n\t]+/).filter(t => t.trim() !== "");
             if(newTasks.length > 0) {
                 tasks = newTasks;
-                pos = { '033': 0, 'ji': 0 }; // 重新开始
+                pos = { '033': 0, 'ji': 0 };
                 renderBoard();
                 tg.HapticFeedback.notificationOccurred('success');
             }
         }
 
         function updateMarker(player, newPos) {
-            // 隐藏该玩家所有标记
             document.querySelectorAll(`.p-${player}`).forEach(m => m.style.display = 'none');
             document.querySelectorAll(`.cell`).forEach(c => c.classList.remove(`active-${player}`));
             
-            // 显示当前位置标记
             const marker = document.getElementById(`m-${player}-${newPos}`);
             if(marker) {
                 marker.style.display = 'block';
                 document.getElementById(`cell-${newPos}`).classList.add(`active-${player}`);
-                // 自动滚动到当前格子
                 document.getElementById(`cell-${newPos}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
-function playTurn() {
-    const btn = document.getElementById('dice-btn');
-
-    if (is033Turn) {
-        // --- 033 的回合：网页内直接掷骰子 ---
-        const steps = Math.floor(Math.random() * 6) + 1;
-        pos['033'] = (pos['033'] + steps) % tasks.length;
-        updateMarker('033', pos['033']);
-
-        const task = tasks[pos['033']];
-        document.getElementById('status').innerText = `你走了 ${steps} 步 ➔ ${task}`;
-
-        // 告诉后端你落在了哪，触发季初言的吐槽
-        tg.sendData(JSON.stringify({
-            type: 'chess_game',
-            player: '033',
-            task: task
-        }));
-
-        tg.HapticFeedback.impactOccurred('light');
-
-        // 切换到季初言的回合 UI
-        is033Turn = false;
-        btn.innerText = "🎲 让季初言掷骰子";
-        btn.style.background = "var(--ji-red)"; // 季初言的代表色
-        btn.style.color = "white";
-
-    } else {
-        // --- 季初言的回合：呼叫 TG 原生骰子 ---
-        document.getElementById('status').innerText = "等待季初言掷骰子...";
-        
-        // 发送指令给后端，触发 bot.send_dice
-        tg.sendData(JSON.stringify({
-            type: 'ji_turn'
-        }));
-
-        tg.HapticFeedback.notificationOccurred('success');
-
-        // 这里建议延迟一小会儿自动关闭网页，方便你回聊天框看他投骰子
-        setTimeout(() => {
-            tg.close();
-        }, 1500); 
-    }
-}
-
+        function playTurn() {
+            const btn = document.getElementById('dice-btn');
+            if (is033Turn) {
+                const steps = Math.floor(Math.random() * 6) + 1;
+                pos['033'] = (pos['033'] + steps) % tasks.length;
+                updateMarker('033', pos['033']);
+                const task = tasks[pos['033']];
+                document.getElementById('status').innerText = `你走了 ${steps} 步 ➔ ${task}`;
+                tg.sendData(JSON.stringify({ type: 'chess_game', player: '033', task: task }));
+                tg.HapticFeedback.impactOccurred('light');
+                is033Turn = false;
+                btn.innerText = "🎲 让季初言掷骰子";
+                btn.style.background = "var(--ji-red)";
+            } else {
+                document.getElementById('status').innerText = "等待季初言掷骰子...";
+                tg.sendData(JSON.stringify({ type: 'ji_turn' }));
+                tg.HapticFeedback.notificationOccurred('success');
+                setTimeout(() => { tg.close(); }, 1500); 
+            }
+        }
 
         renderBoard();
     </script>
