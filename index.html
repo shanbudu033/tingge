@@ -5,50 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>033 x 季初言：命运羁绊棋</title>
     <style>
-        :root { --main-blue: #00d2ff; --main-red: #ff4444; }
-        body { background: #121212; color: #eee; font-family: 'PingFang SC', sans-serif; margin: 0; padding: 15px; }
-        h2 { color: var(--main-blue); margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,210,255,0.3); }
-        
-        /* 指令导入区 */
-        #config-zone { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
-        textarea { width: 90%; height: 60px; background: #222; color: #ccc; border: 1px solid #444; border-radius: 5px; padding: 5px; font-size: 12px; }
-        .import-btn { background: #444; color: #fff; border: none; padding: 5px 15px; border-radius: 5px; margin-top: 5px; cursor: pointer; }
+        /* 033 专属配色方案 */
+        :root {
+            --bg-dark: #142844;    /* Color 01: 深邃底色 */
+            --border-blue: #3966A2;/* Color 02: 边框/次要色 */
+            --main-blue: #6192D3;  /* Color 03: 主色调/棋子 */
+            --text-light: #D5DFEB; /* Color 04: 文字/淡色 */
+            --accent-white: #F8F6F7;/* Color 05: 高亮/按钮 */
+            --ji-red: #ff5e5e;     /* 季初言的标识红（稍微调亮配合冷色） */
+        }
 
-        /* 棋盘布局 */
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
-        .cell { background: #262626; border: 1px solid #3a3a3a; height: 85px; border-radius: 8px; 
-                display: flex; align-items: center; justify-content: center; font-size: 11px; 
-                padding: 5px; position: relative; transition: all 0.3s; overflow: hidden; }
-        
-        /* 玩家头像标记 */
-        .p-mark { width: 18px; height: 18px; border-radius: 50%; position: absolute; bottom: 5px; display: none; border: 2px solid #fff; }
-        .p-033 { background: var(--main-blue); left: 5px; box-shadow: 0 0 8px var(--main-blue); }
-        .p-ji { background: var(--main-red); right: 5px; box-shadow: 0 0 8px var(--main-red); }
-        
-        /* 激活状态 */
-        .active-033 { border-color: var(--main-blue); background: #002233; }
-        .active-ji { border-color: var(--main-red); background: #331111; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-light); 
+            font-family: 'PingFang SC', -apple-system, sans-serif; 
+            margin: 0; padding: 15px; 
+            display: flex; flex-direction: column; height: 100vh;
+        }
 
-        /* 操作区 */
-        .controls { position: fixed; bottom: 20px; left: 0; width: 100%; text-align: center; }
-        #dice-btn { background: var(--main-blue); color: #000; border: none; padding: 12px 40px; 
-                    border-radius: 30px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #status { font-size: 13px; color: #888; margin-bottom: 80px; }
+        h2 { color: var(--accent-white); margin: 0 0 10px 0; font-weight: 300; letter-spacing: 2px; }
+        
+        /* 配置区 */
+        #config-zone { 
+            background: rgba(57, 102, 162, 0.2); 
+            padding: 12px; border-radius: 12px; 
+            margin-bottom: 15px; border: 1px solid var(--border-blue); 
+        }
+        textarea { 
+            width: 94%; height: 50px; background: rgba(20, 40, 68, 0.6); 
+            color: var(--accent-white); border: 1px solid var(--border-blue); 
+            border-radius: 6px; padding: 8px; font-size: 12px; outline: none;
+        }
+        .import-btn { 
+            background: var(--main-blue); color: var(--bg-dark); 
+            border: none; padding: 6px 18px; border-radius: 4px; 
+            margin-top: 8px; font-weight: bold; font-size: 12px;
+        }
+
+        /* 自动伸缩棋盘 */
+        #board-container { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        .board { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* 保持每行4个，数量多就往下排 */
+            gap: 6px; 
+        }
+        .cell { 
+            background: rgba(97, 146, 211, 0.1); 
+            border: 1px solid var(--border-blue); 
+            min-height: 70px; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 10px; padding: 4px; position: relative; 
+            transition: all 0.3s; line-height: 1.2;
+        }
+        
+        /* 标记显示 */
+        .p-mark { width: 14px; height: 14px; border-radius: 50%; position: absolute; bottom: 4px; border: 1.5px solid var(--accent-white); z-index: 10; }
+        .p-033 { background: var(--main-blue); left: 4px; box-shadow: 0 0 5px var(--main-blue); }
+        .p-ji { background: var(--ji-red); right: 4px; box-shadow: 0 0 5px var(--ji-red); }
+        
+        /* 激活格样式 */
+        .active-033 { border: 1.5px solid var(--accent-white) !important; background: rgba(97, 146, 211, 0.3); }
+        .active-ji { border: 1.5px solid var(--ji-red) !important; background: rgba(255, 94, 94, 0.2); }
+
+        /* 操作悬浮区 */
+        .controls { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: linear-gradient(transparent, var(--bg-dark) 40%);
+            padding: 20px 0; text-align: center; 
+        }
+        #dice-btn { 
+            background: var(--accent-white); color: var(--bg-dark); 
+            border: none; padding: 12px 45px; border-radius: 30px; 
+            font-weight: bold; font-size: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #status { font-size: 12px; color: var(--main-blue); margin-bottom: 10px; padding: 0 20px; }
     </style>
 </head>
 <body>
 
     <h2>命运羁绊棋</h2>
-    <p style="font-size: 12px; color: #666; margin-top: 0;">Player: 033 vs 季初言</p>
-
+    
     <div id="config-zone">
-        <textarea id="task-input" placeholder="输入12个指令，用中文逗号或空格隔开..."></textarea><br>
-        <button class="import-btn" onclick="importTasks()">✨ 一键导入新指令</button>
+        <textarea id="task-input" placeholder="输入任意数量指令，用空格或逗号隔开..."></textarea>
+        <button class="import-btn" onclick="importTasks()">✨ 导入指令</button>
     </div>
     
-    <div class="board" id="board"></div>
-
-    <div id="status">准备就绪，请 033 开始掷骰子</div>
+    <div id="board-container">
+        <div class="board" id="board"></div>
+        <div id="status">准备就绪</div>
+    </div>
 
     <div class="controls">
         <button id="dice-btn" onclick="playTurn()">🎲 033 掷骰子</button>
@@ -59,8 +104,8 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 默认指令
-        let tasks = ["起点", "夸夸033", "清算TODO", "季初言心声", "发自拍画稿", "讲冷笑话", "摸头杀", "喝杯水", "坦白局", "换人设", "毒舌模式", "终点"];
+        // 默认指令 (可以无限长)
+        let tasks = ["起点", "评价画稿", "清算TODO", "季初言心声", "讲冷笑话", "摸头杀", "喝杯水", "坦白局", "换人设", "毒舌模式", "温柔语音", "终点"];
         let pos = { '033': 0, 'ji': 0 };
         let is033Turn = true;
 
@@ -72,67 +117,68 @@
                 div.className = 'cell';
                 div.id = 'cell-' + i;
                 div.innerHTML = `<span>${t}</span>
-                                 <div class="p-mark p-033" id="m-033-${i}"></div>
-                                 <div class="p-mark p-ji" id="m-ji-${i}"></div>`;
+                                 <div class="p-mark p-033" id="m-033-${i}" style="display:none"></div>
+                                 <div class="p-mark p-ji" id="m-ji-${i}" style="display:none"></div>`;
                 boardEl.appendChild(div);
             });
-            updateMarker('033', 0);
-            updateMarker('ji', 0);
+            updateMarker('033', pos['033']);
+            updateMarker('ji', pos['ji']);
         }
 
         function importTasks() {
             const input = document.getElementById('task-input').value;
-            if(!input) return alert("写点什么再导入呀~");
-            // 支持中文逗号、英文逗号、空格分割
-            const newTasks = input.split(/[，, \n]+/).filter(t => t.trim() !== "");
-            if(newTasks.length < 12) {
-                alert("指令最好凑齐12个，不然棋盘太空了！");
+            if(!input) return;
+            // 改进分词逻辑
+            const newTasks = input.split(/[，, \n\t]+/).filter(t => t.trim() !== "");
+            if(newTasks.length > 0) {
+                tasks = newTasks;
+                pos = { '033': 0, 'ji': 0 }; // 重新开始
+                renderBoard();
+                tg.HapticFeedback.notificationOccurred('success');
             }
-            tasks = newTasks.slice(0, 12); // 只取前12个
-            renderBoard();
-            tg.HapticFeedback.notificationOccurred('success');
         }
 
         function updateMarker(player, newPos) {
-            // 清除该玩家所有旧标记
+            // 隐藏该玩家所有标记
             document.querySelectorAll(`.p-${player}`).forEach(m => m.style.display = 'none');
             document.querySelectorAll(`.cell`).forEach(c => c.classList.remove(`active-${player}`));
             
-            // 显示新标记
+            // 显示当前位置标记
             const marker = document.getElementById(`m-${player}-${newPos}`);
-            if(marker) marker.style.display = 'block';
-            document.getElementById(`cell-${newPos}`).classList.add(`active-${player}`);
+            if(marker) {
+                marker.style.display = 'block';
+                document.getElementById(`cell-${newPos}`).classList.add(`active-${player}`);
+                // 自动滚动到当前格子
+                document.getElementById(`cell-${newPos}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         function playTurn() {
-            const player = is033Turn ? '033' : 'ji';
+            const playerKey = is033Turn ? '033' : 'ji';
+            const playerName = is033Turn ? '033' : '季初言';
             const steps = Math.floor(Math.random() * 6) + 1;
             
-            // 计算新位置
-            pos[player] = (pos[player] + steps) % tasks.length;
-            updateMarker(player, pos[player]);
+            pos[playerKey] = (pos[playerKey] + steps) % tasks.length;
+            updateMarker(playerKey, pos[playerKey]);
 
-            const task = tasks[pos[player]];
-            document.getElementById('status').innerText = `${player === '033' ? '你' : '季初言'} 投出了 ${steps} 点，落在：${task}`;
+            const task = tasks[pos[playerKey]];
+            document.getElementById('status').innerText = `${playerName} 走了 ${steps} 步 ➔ ${task}`;
 
-            // 发送数据给 Python 后台
             tg.sendData(JSON.stringify({
                 type: 'chess_game',
-                player: player === '033' ? '033' : '季初言',
+                player: playerName,
                 task: task
             }));
 
-            // 振动反馈
-            tg.HapticFeedback.impactOccurred('medium');
+            tg.HapticFeedback.impactOccurred('light');
 
-            // 切换回合
             is033Turn = !is033Turn;
             const btn = document.getElementById('dice-btn');
             btn.innerText = is033Turn ? "🎲 033 掷骰子" : "🎲 让季初言掷骰子";
-            btn.style.background = is033Turn ? "var(--main-blue)" : "var(--main-red)";
+            btn.style.background = is033Turn ? "var(--accent-white)" : "var(--ji-red)";
+            btn.style.color = is033Turn ? "var(--bg-dark)" : "white";
         }
 
-        // 初始化
         renderBoard();
     </script>
 </body>
