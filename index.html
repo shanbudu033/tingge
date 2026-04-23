@@ -1,15 +1,80 @@
-<div id="aplayer"></div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>033 x 季初言：命运棋盘</title>
+    <style>
+        body { background: #1a1a1a; color: #eee; font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 20px; }
+        .cell { border: 1px solid #444; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 10px; position: relative; background: #2a2a2a; padding: 2px; }
+        .active-033 { border: 2px solid #00d2ff !important; background: #003344 !important; }
+        .active-ji { border: 2px solid #ff4444 !important; background: #441111 !important; }
+        .player-tag { position: absolute; top: 2px; font-weight: bold; font-size: 8px; }
+        #dice-btn { background: #00d2ff; color: #000; border: none; padding: 15px 30px; border-radius: 25px; margin-top: 20px; font-weight: bold; }
+        #status { margin-top: 15px; color: #aaa; min-height: 40px; }
+    </style>
+</head>
+<body>
+    <h3>🎲 命运棋盘</h3>
+    <div id="status">点击骰子开始你的回合</div>
+    
+    <div class="board" id="board"></div>
 
-<script>
-const ap = new APlayer({
-    container: document.getElementById('aplayer'),
-    audio: [{
-        name: '测试音频',
-        artist: 'debug',
-        url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3',
-        cover: ''
-    }]
-});
+    <button id="dice-btn" onclick="playTurn()">🎲 033 掷骰子</button>
 
-window.testAp = ap;
-</script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // --- 033，这里就是你可以自己改的“文字指令” ---
+        const tasks = [
+            "起点", "让季初言夸你一分钟", "自拍一张画稿", "季初言心声告白",
+            "清算清单任务", "互换身份聊天", "季初言讲个冷笑话", "033喝杯水",
+            "真心话：最讨厌对方什么", "大冒险：发语音唱歌", "季初言摸头杀", "随机清空一项TODO"
+        ];
+
+        let pos = { '033': 0, 'ji': 0 };
+        let is033Turn = true;
+
+        // 初始化棋盘
+        const boardEl = document.getElementById('board');
+        tasks.forEach((t, i) => {
+            const div = document.createElement('div');
+            div.className = 'cell';
+            div.id = 'cell-' + i;
+            div.innerText = t;
+            boardEl.appendChild(div);
+        });
+
+        function playTurn() {
+            const player = is033Turn ? '033' : 'ji';
+            const steps = Math.floor(Math.random() * 6) + 1;
+            
+            // 移除旧位置显示
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('active-' + player));
+
+            // 更新位置
+            pos[player] = (pos[player] + steps) % tasks.length;
+            const currentCell = document.getElementById('cell-' + pos[player]);
+            currentCell.classList.add('active-' + player);
+
+            const task = tasks[pos[player]];
+            document.getElementById('status').innerText = `${player} 走了 ${steps} 步，落在：${task}`;
+
+            // 把指令发给季初言
+            tg.sendData(JSON.stringify({
+                type: 'chess_game',
+                player: player,
+                task: task
+            }));
+
+            // 切换回合
+            is033Turn = !is033Turn;
+            document.getElementById('dice-btn').innerText = is033Turn ? "🎲 033 掷骰子" : "🎲 让季初言掷骰子";
+            document.getElementById('dice-btn').style.background = is033Turn ? "#00d2ff" : "#ff4444";
+        }
+    </script>
+</body>
+</html>
