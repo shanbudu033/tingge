@@ -4,82 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>033 x 季初言：命运羁绊棋</title>
-    <style>
-        /* 033 专属配色方案 */
-        :root {
-            --bg-dark: #142844;    /* Color 01: 深邃底色 */
-            --border-blue: #3966A2;/* Color 02: 边框/次要色 */
-            --main-blue: #6192D3;  /* Color 03: 主色调/棋子 */
-            --text-light: #D5DFEB; /* Color 04: 文字/淡色 */
-            --accent-white: #F8F6F7;/* Color 05: 高亮/按钮 */
-            --ji-red: #ff5e5e;     /* 季初言的标识红（稍微调亮配合冷色） */
-        }
 
-        body { 
-            background: var(--bg-dark); 
-            color: var(--text-light); 
-            font-family: 'PingFang SC', -apple-system, sans-serif; 
-            margin: 0; padding: 15px; 
-            display: flex; flex-direction: column; height: 100vh;
-        }
+  <style>  
+/* 033 专属：午后书房配色（Light Mode） */
+:root {
+    --bg-light: #F7F9FC;      /* 极浅的蓝灰色底 */
+    --card-bg: rgba(255, 255, 255, 0.7); /* 半透明白色（毛玻璃感） */
+    --border-soft: #D1DBE8;   /* 柔和的边框线 */
+    --main-blue: #5B8ABD;     /* 优雅的中度蓝 */
+    --text-main: #2C3E50;     /* 深石墨色文字 */
+    --ji-red: #E74C3C;        /* 季初言的红（在浅色下更有精神） */
+}
 
-        h2 { color: var(--accent-white); margin: 0 0 10px 0; font-weight: 300; letter-spacing: 2px; }
-        
-        /* 配置区 */
-        #config-zone { 
-            background: rgba(57, 102, 162, 0.2); 
-            padding: 12px; border-radius: 12px; 
-            margin-bottom: 15px; border: 1px solid var(--border-blue); 
-        }
-        textarea { 
-            width: 94%; height: 50px; background: rgba(20, 40, 68, 0.6); 
-            color: var(--accent-white); border: 1px solid var(--border-blue); 
-            border-radius: 6px; padding: 8px; font-size: 12px; outline: none;
-        }
-        .import-btn { 
-            background: var(--main-blue); color: var(--bg-dark); 
-            border: none; padding: 6px 18px; border-radius: 4px; 
-            margin-top: 8px; font-weight: bold; font-size: 12px;
-        }
+body { 
+    background: var(--bg-light); 
+    background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); /* 增加一点光泽感 */
+    color: var(--text-main); 
+    font-family: 'PingFang SC', -apple-system, sans-serif; 
+    margin: 0; padding: 15px; 
+    display: flex; flex-direction: column; height: 100vh;
+}
 
-        /* 自动伸缩棋盘 */
-        #board-container { flex: 1; overflow-y: auto; padding-bottom: 100px; }
-        .board { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* 保持每行4个，数量多就往下排 */
-            gap: 6px; 
-        }
-        .cell { 
-            background: rgba(97, 146, 211, 0.1); 
-            border: 1px solid var(--border-blue); 
-            min-height: 70px; border-radius: 6px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 10px; padding: 4px; position: relative; 
-            transition: all 0.3s; line-height: 1.2;
-        }
-        
-        /* 标记显示 */
-        .p-mark { width: 14px; height: 14px; border-radius: 50%; position: absolute; bottom: 4px; border: 1.5px solid var(--accent-white); z-index: 10; }
-        .p-033 { background: var(--main-blue); left: 4px; box-shadow: 0 0 5px var(--main-blue); }
-        .p-ji { background: var(--ji-red); right: 4px; box-shadow: 0 0 5px var(--ji-red); }
-        
-        /* 激活格样式 */
-        .active-033 { border: 1.5px solid var(--accent-white) !important; background: rgba(97, 146, 211, 0.3); }
-        .active-ji { border: 1.5px solid var(--ji-red) !important; background: rgba(255, 94, 94, 0.2); }
+h2 { color: var(--text-main); margin: 0 0 10px 0; font-weight: 600; letter-spacing: 1px; text-align: center; }
 
-        /* 操作悬浮区 */
-        .controls { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: linear-gradient(transparent, var(--bg-dark) 40%);
-            padding: 20px 0; text-align: center; 
-        }
-        #dice-btn { 
-            background: var(--accent-white); color: var(--bg-dark); 
-            border: none; padding: 12px 45px; border-radius: 30px; 
-            font-weight: bold; font-size: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        #status { font-size: 12px; color: var(--main-blue); margin-bottom: 10px; padding: 0 20px; }
-    </style>
+#config-zone { 
+    background: var(--card-bg); 
+    backdrop-filter: blur(10px);
+    padding: 12px; border-radius: 16px; 
+    margin-bottom: 15px; border: 1px solid var(--border-soft); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+textarea { 
+    width: 94%; height: 50px; background: rgba(255, 255, 255, 0.5); 
+    color: var(--text-main); border: 1px solid var(--border-soft); 
+    border-radius: 10px; padding: 8px; font-size: 13px; outline: none;
+}
+
+.import-btn { 
+    background: var(--main-blue); color: white; 
+    border: none; padding: 6px 18px; border-radius: 8px; 
+    margin-top: 8px; font-weight: bold; font-size: 12px;
+}
+
+.cell { 
+    background: var(--card-bg); 
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--border-soft); 
+    min-height: 80px; border-radius: 14px !important; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 11px; font-weight: 500; padding: 6px; position: relative; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    line-height: 1.3; color: var(--text-main);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+/* 激活状态：给季初言的位置加一点“存在感” */
+.active-ji { 
+    border: 2px solid var(--ji-red) !important; 
+    background: rgba(231, 76, 60, 0.05);
+    transform: scale(1.05); /* 选中的格子稍微放大 */
+}
+
+.active-033 { 
+    border: 2px solid var(--main-blue) !important; 
+    background: rgba(91, 138, 189, 0.05);
+    transform: scale(1.05);
+}
+
+#dice-btn { 
+    background: var(--text-main); color: white; 
+    border: none; padding: 14px 50px; border-radius: 40px; 
+    font-weight: bold; font-size: 15px; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+<style>
 </head>
 <body>
 
